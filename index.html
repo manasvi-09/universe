@@ -1,0 +1,310 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Interactive Universe Gallery</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700&display=swap" rel="stylesheet">
+  <style>
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: white;
+      font-family: 'Orbitron', sans-serif;
+      background: #000;
+      scroll-behavior: smooth;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 1000;
+      border-bottom: 1px solid #444;
+    }
+
+    header h2 {
+      margin: 0;
+      color: #56e6e6;
+      font-size: 1.5rem;
+    }
+
+    nav a {
+      margin-left: 20px;
+      text-decoration: none;
+      color: white;
+      font-size: 1rem;
+      transition: color 0.3s;
+    }
+
+    nav a:hover {
+      color: #56e6e6;
+    }
+
+    .loader-wrapper {
+      height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      flex-direction: column;
+      background: url('https://www.auckland.ac.nz/content/auckland/en/science/about-the-faculty/department-of-physics/physics-research/astronomy-astrophysics-and-particle-physics/_jcr_content/leftpar/imagecomponent/image.img.480.low.jpg/1594702965672.jpg') no-repeat center center fixed;
+      background-size: cover;
+    }
+
+    .loader h1 span {
+      display: block;
+      font-size: 2.8rem;
+      opacity: 0;
+      transform: translateY(20px);
+      animation: fadeIn 1s forwards;
+    }
+
+    .loader h1 span:nth-child(1) { animation-delay: 0s; }
+    .loader h1 span:nth-child(2) { animation-delay: 1s; }
+    .loader h1 span:nth-child(3) { animation-delay: 2s; }
+    .loader h1 span:nth-child(4) {
+      animation: popOut 2s forwards, stayVisible 1s forwards, blinkFont 1s infinite alternate;
+      animation-delay: 3s, 5s, 6s;
+      color: #56e6e6;
+      text-shadow: 0 0 10px #56e6e6;
+      text-align: center;
+      font-size: 4rem;
+    }
+
+    @keyframes blinkFont {
+      0% { font-family: 'Orbitron', sans-serif; }
+      100% { font-family: 'Courier New', monospace; }
+    }
+
+    .dots {
+      font-size: 2rem;
+      margin-top: 20px;
+      animation: blinkDots 1.2s steps(1, end) infinite;
+    }
+
+    .progress-bar {
+      margin-top: 30px;
+      width: 80%;
+      height: 10px;
+      background: #333;
+      border-radius: 10px;
+      overflow: hidden;
+    }
+
+    .progress {
+      width: 0%;
+      height: 100%;
+      background: #56e6e6;
+      animation: loadProgress 7s linear forwards;
+    }
+
+    @keyframes loadProgress {
+      to { width: 100%; }
+    }
+
+    @keyframes fadeIn {
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes popOut {
+      0%   { opacity: 0; transform: scale(0.5) translateY(30px); }
+      30%  { opacity: 1; transform: scale(1.2) translateY(-10px); }
+      50%  { transform: scale(1); }
+      70%  { transform: scale(1.2) translateY(-10px); }
+      100% { opacity: 0; transform: scale(0.5) translateY(30px); }
+    }
+
+    @keyframes stayVisible {
+      to { opacity: 1; }
+    }
+
+    .skip-btn {
+      margin-top: 25px;
+      padding: 10px 20px;
+      font-size: 1rem;
+      border: none;
+      background: #56e6e6;
+      color: #111;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s;
+    }
+
+    .skip-btn:hover {
+      background: #3ccccc;
+    }
+
+    .gallery {
+      display: none;
+      overflow: hidden;
+      white-space: nowrap;
+      padding: 100px 0 40px;
+    }
+
+    .marquee-track {
+      display: flex;
+      animation: scrollMarquee 40s linear infinite;
+      gap: 30px;
+    }
+
+    @keyframes scrollMarquee {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+
+    .img-container {
+      flex: 0 0 auto;
+      width: 300px;
+      height: 200px;
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+      box-shadow: 0 0 15px rgba(255, 255, 255, 0.1);
+    }
+
+    .img-container img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform 0.5s ease;
+    }
+
+    .img-container:hover img {
+      transform: scale(1.1);
+    }
+
+    .overlay {
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  opacity: 0; /* Hide by default */
+  color: #fff;
+  font-size: 1.4rem;
+  font-weight: bold;
+  text-align: center;
+  padding: 20px;
+  transition: opacity 0.4s ease;
+}
+
+
+   
+
+    /* Info section */
+    .info-section {
+      background: #111;
+      padding: 60px 40px;
+      text-align: center;
+    }
+
+    .info-section h2 {
+      color: #56e6e6;
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+    }
+
+    .info-section p {
+      font-size: 1.2rem;
+      max-width: 900px;
+      margin: auto;
+      line-height: 1.7;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- Menu -->
+  <header>
+    <h2>Cosmic Explorer</h2>
+    <nav>
+      <a href="#gallery">Gallery</a>
+      <a href="#universe-info">About Universe</a>
+      
+    </nav>
+  </header>
+
+  <!-- Loader Section -->
+  <div class="loader-wrapper" id="loader">
+    <div class="loader">
+      <h1>
+        <span>YOUR</span>
+        <span>WEB EXPERIENCE</span>
+        <span>IS LOADING RIGHT</span>
+        <span>NOW</span>
+      </h1>
+      <div class="dots">...</div>
+      <div class="progress-bar">
+        <div class="progress"></div>
+      </div>
+      <button class="skip-btn" onclick="completeLoading()">Skip</button>
+    </div>
+  </div>
+
+  <!-- Gallery Section -->
+  <div class="gallery" id="gallery">
+  <div class="marquee-track">
+    <div class="img-container">
+      <img src="https://plus.unsplash.com/premium_photo-1669839137069-4166d6ea11f4?fm=jpg&q=60&w=3000" alt="Universe">
+      <div class="overlay">This stunning view of the universe captures the vibrant colors and vast emptiness of deep space.</div>
+    </div>
+    <div class="img-container">
+      <img src="https://science.nasa.gov/wp-content/uploads/2023/09/sofia-spitzer-m17-composite.png?w=884" alt="Nebula">
+      <div class="overlay">The M17 Nebula is a stellar nursery where stars are born in cosmic clouds of dust and gas.</div>
+    </div>
+    <div class="img-container">
+      <img src="https://cdn.britannica.com/57/181857-050-972A4F96/Artist-rendering-matter-black-hole.jpg" alt="Black Hole">
+      <div class="overlay">An artist’s depiction of a black hole showing how light is bent around its immense gravity.</div>
+    </div>
+    <div class="img-container">
+      <img src="https://webbtelescope.org/files/live/sites/webb/files/home/webb-science/early-universe/_images/wt-video-preview-Universe-Dark-Ages.jpg?t=tn370" alt="Dark Ages">
+      <div class="overlay">This image reflects the Universe during the 'Dark Ages', before stars and galaxies had formed.</div>
+    </div>
+  </div>
+</div>
+
+
+  <section class="info-section" id="universe-info">
+    <h2>About the Universe</h2>
+    <p>
+      The Universe is a vast, mysterious expanse of space, time, matter, and energy. It includes everything that exists—planets, stars, galaxies, black holes, and even the invisible dark matter and dark energy. Born from the Big Bang roughly 13.8 billion years ago, the Universe continues to expand and evolve. Scientists use telescopes and satellites to explore its wonders and understand its origins. With each discovery, we unlock more about the nature of existence and our place within this cosmic masterpiece.
+    </p>
+  </section>
+
+<section class="info-section">
+  <h2>Created By</h2>
+  <div style="margin-top: 30px;">
+   
+     
+    <h3 style="margin-top: 15px; font-size: 1.5rem;">Tanish Patil</h3>
+     
+    <h3 style="margin-top: 15px; font-size: 1.5rem;">Manasvi Patil</h3>
+    
+  </div>
+</section>
+
+  <script>
+    function completeLoading() {
+      document.getElementById('loader').style.display = 'none';
+      document.getElementById('gallery').style.display = 'block';
+    }
+
+    setTimeout(completeLoading, 8000);
+  </script>
+
+</body>
+</html>
